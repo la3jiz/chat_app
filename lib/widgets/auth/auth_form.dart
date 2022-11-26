@@ -49,13 +49,13 @@ class _AuthFormState extends State<AuthForm> {
         _userEmail.trim(),
         _userPassword.trim(),
         _userName.trim(),
-        _userImageFile as File,
+        _userImageFile ?? File('emptyFile.txt'),
         _isLogin,
         context,
       );
     }
   }
-
+// // fatmaridene1
   @override
   Widget build(BuildContext context) {
     return Center(
