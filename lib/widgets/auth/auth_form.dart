@@ -1,7 +1,9 @@
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:chat_app/widgets/pickers/user_image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AuthForm extends StatefulWidget {
@@ -23,6 +25,11 @@ class AuthForm extends StatefulWidget {
 
 class _AuthFormState extends State<AuthForm> {
   final _formKey = GlobalKey<FormState>();
+  Map<String, bool> customFormValidation = {
+    'isValidUsername': true,
+    'isValidEmail': true,
+    'isValidPassword': true
+  };
 
   String _userEmail = '';
   String _userName = '';
@@ -55,67 +62,260 @@ class _AuthFormState extends State<AuthForm> {
       );
     }
   }
+
 // // fatmaridene1
   @override
   Widget build(BuildContext context) {
     return Center(
-        child: Card(
-      margin: const EdgeInsets.all(20),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Form(
+        child: SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.chat_bubble,
+            size: 100,
+          ),
+          SizedBox(
+            height: 25,
+          ),
+          Text(
+            "chatty !",
+            style: GoogleFonts.bebasNeue(fontSize: 52),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Text("Welcome Back, you've been missed !",
+              style: TextStyle(fontSize: 20)),
+          Form(
             key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                _isLogin
+                    ? SizedBox(
+                        height: 50,
+                      )
+                    : SizedBox(
+                        height: 25,
+                      ),
                 if (!_isLogin) UserImagePicker(_pickedImage),
-                TextFormField(
-                  key: ValueKey('email'),
-                  validator: (value) {
-                    if (value!.isEmpty || !value.contains('@')) {
-                      return 'please enter a valid email';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _userEmail = value as String;
-                  },
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(labelText: 'Email adresse'),
+                //* login email input
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      border: Border.all(color: Colors.white),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 20),
+                      child: TextFormField(
+                        key: ValueKey('email'),
+                        validator: (value) {
+                          if (value!.isEmpty || !value.contains('@')) {
+                            setState(() {
+                              customFormValidation = {
+                                'isValidEmail': false,
+                                'isValidUsername':
+                                    customFormValidation['isValidUsername']
+                                        as bool,
+                                'isValidPassword':
+                                    customFormValidation['isValidPassword']
+                                        as bool
+                              };
+                            });    
+                            return null;                
+                          }
+                          return null;
+                        },
+                        onChanged: ((value) {
+                          if(!value!.isEmpty && value.contains('@'))
+                           setState(() {
+                              customFormValidation = {
+                                'isValidEmail': true,
+                                'isValidUsername':
+                                    customFormValidation['isValidUsername']
+                                        as bool,
+                                'isValidPassword':
+                                    customFormValidation['isValidPassword']
+                                        as bool
+                              };
+                            });
+                        }),
+                        onSaved: (value) {
+                          _userEmail = value as String;
+                        },
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                            border: InputBorder.none, hintText: 'Email'),
+                      ),
+                    ),
+                  ),
+                ),
+                if (!customFormValidation['isValidEmail']! as bool)
+                  Padding(
+                    padding: const EdgeInsets.only(top:8.0),
+                    child: Text(
+                      'Please Enter a Valid Email.',
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                        color: Colors.red,
+                        
+                      ),
+                    ),
+                  ),
+                SizedBox(
+                  height: 10,
                 ),
                 if (!_isLogin)
-                  TextFormField(
-                    key: ValueKey('username'),
-                    validator: (value) {
-                      if (value!.isEmpty || value.length < 4) {
-                        return 'please enter at least 4 characters';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) {
-                      _userName = value as String;
-                    },
-                    decoration: const InputDecoration(labelText: 'Username'),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        border: Border.all(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20),
+                        child: TextFormField(
+                          key: ValueKey('username'),
+                          validator: (value) {
+                            if (value!.isEmpty || value.length < 4) {
+                              setState(() {
+                                customFormValidation = {
+                                  'isValidEmail':
+                                      customFormValidation['isValidEmail']
+                                          as bool,
+                                  'isValidUsername': false,
+                                  'isValidPassword':
+                                      customFormValidation['isValidPassword']
+                                          as bool
+                                };
+                              });
+                              return null;
+                            }
+                            return null;
+                          },
+
+                          onChanged: (value) {
+                            if (!value!.isEmpty && value.length > 4) {
+                              setState(() {
+                                customFormValidation = {
+                                  'isValidEmail':
+                                      customFormValidation['isValidEmail']
+                                          as bool,
+                                  'isValidUsername': true,
+                                  'isValidPassword':
+                                      customFormValidation['isValidPassword']
+                                          as bool
+                                };
+                              });
+                              return null;
+                            }
+                            return null;
+                          },
+                          onSaved: (value) {
+                            _userName = value as String;
+                          },
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'username',
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                TextFormField(
-                  key: ValueKey('password'),
-                  validator: (value) {
-                    if (value!.isEmpty || value.length < 7) {
-                      return 'please enter at least 7 characters';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _userPassword = value as String;
-                  },
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
+                  
+                  if (!customFormValidation['isValidUsername']! as bool && !_isLogin)
+                  Padding(
+                    padding: const EdgeInsets.only(top:8.0),
+                    child: Text(
+                      'Please Enter a username with 4 characters at least.',
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                        color: Colors.red,
+                        
+                      ),
+                    ),
                   ),
-                  obscureText: true,
+                if (!_isLogin)
+                  SizedBox(
+                    height: 10,
+                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      border: Border.all(color: Colors.white),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 20.0),
+                      child: TextFormField(
+                        key: ValueKey('password'),
+                        validator: (value) {
+                          if (value!.isEmpty || value.length < 7) {
+                            setState(() {
+                              customFormValidation = {
+                                'isValidEmail':
+                                    customFormValidation['isValidEmail']
+                                        as bool,
+                                'isValidUsername':
+                                    customFormValidation['isValidUsername']
+                                        as bool,
+                                'isValidPassword': false
+                              };
+                            });
+                            return null;
+                          }
+                          return null;
+                        },
+
+                        onChanged: ((value) {
+                                    if (!value!.isEmpty && value.length > 7) {
+                            setState(() {
+                              customFormValidation = {
+                                'isValidEmail':
+                                    customFormValidation['isValidEmail']
+                                        as bool,
+                                'isValidUsername':
+                                    customFormValidation['isValidUsername']
+                                        as bool,
+                                'isValidPassword': true
+                              };
+                            });
+                            return null;
+                          }
+                          return null;
+                        }),
+                        onSaved: (value) {
+                          _userPassword = value as String;
+                        },
+                        decoration: const InputDecoration(
+                            border: InputBorder.none, hintText: 'Password'),
+                        obscureText: true,
+                      ),
+                    ),
+                  ),
                 ),
+                 if (!customFormValidation['isValidPassword']! as bool)
+                    Padding(
+                    padding: const EdgeInsets.only(top:8.0),
+                    child: Text(
+                      'Please Enter a Password with 7 characters at least.',
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                        color: Colors.red,
+                        
+                      ),
+                    ),
+                  ),
                 const SizedBox(
-                  height: 12,
+                  height: 10,
                 ),
                 if (widget._isLoading)
                   Padding(
@@ -123,27 +323,98 @@ class _AuthFormState extends State<AuthForm> {
                     child: CircularProgressIndicator(),
                   ),
                 if (!widget._isLoading)
-                  ElevatedButton(
-                    onPressed: _submit,
-                    child: Text(_isLogin ? 'Login' : 'Signup'),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25),
+                    child: GestureDetector(
+                      onTap: _submit,
+                      child: Container(
+                        padding: EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                            color: Colors.deepPurple,
+                            borderRadius: BorderRadius.circular(12)),
+                        child: Center(
+                          child: Text(
+                            _isLogin ? 'Login' : 'Signup',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
+                SizedBox(
+                  height: 25,
+                ),
                 if (!widget._isLoading)
-                  TextButton(
-                    onPressed: () {
+                  GestureDetector(
+                    onTap: () {
                       setState(() {
                         _isLogin = !_isLogin;
                       });
                     },
-                    child: Text(_isLogin
-                        ? 'Create new Account'
-                        : 'I already ahve an account'),
-                    style: TextButton.styleFrom(),
+                    child: _isLogin
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            // ignore: prefer_const_literals_to_create_immutables
+                            children: [
+                              // ignore: prefer_const_constructors
+                              Text(
+                                "Don't have an account ?, ",
+                                // ignore: prefer_const_constructors
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              // ignore: prefer_const_constructors
+                              Text(
+                                "Register Now.",
+                                style: const TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            ],
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            // ignore: prefer_const_literals_to_create_immutables
+                            children: [
+                              Text(
+                                "Already have an account ?, ",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              // ignore: prefer_const_constructors
+                              Text(
+                                "Login Now.",
+                                // ignore: prefer_const_constructors
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            ],
+                          ),
                   ),
               ],
             ),
           ),
-        ),
+        ],
       ),
     ));
   }
 }
+/*
+      ElevatedButton(
+                  onPressed: _submit,
+                  child: Text(_isLogin ? 'Login' : 'Signup'),
+                ),
+
+                 child: Text(_isLogin
+                      ? 'Create new Account'
+                      : 'I already have an account'),
+ */

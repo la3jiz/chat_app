@@ -20,9 +20,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.pink,
-        backgroundColor: Colors.pink,
-        accentColor: Colors.deepPurple,
+        primarySwatch: Colors.green,
+        accentColor: Colors.green,
         accentColorBrightness: Brightness.dark,
         buttonTheme: ButtonTheme.of(context).copyWith(
           buttonColor: Colors.deepPurple,
